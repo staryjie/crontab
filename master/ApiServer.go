@@ -1,6 +1,8 @@
 package master
 
 import (
+	"encoding/json"
+	"github.com/staryjie/crontab/common"
 	"net"
 	"net/http"
 	"strconv"
@@ -18,8 +20,44 @@ type ApiServer struct {
 }
 
 // 保存任务接口
-func handleJobSave(w http.ResponseWriter, r *http.Request) {
+// POST job = {"name": "job1", "command": "echo hello", "cronExpr": "* * * * *"}
+func handleJobSave(resp http.ResponseWriter, req *http.Request) {
+	var (
+		err     error
+		postJob string
+		job     common.Job
+		oldJob  *common.Job
+		bytes   []byte
+	)
 	// 任务保存到etcd中
+	// 1. 解析POST表单
+	if err = req.ParseForm(); err != nil {
+		// 解析表单失败
+		goto ERR
+	}
+	// 2.取表单中的job对象
+	postJob = req.PostForm.Get("job")
+
+	// 3.反序列化Job
+	if err = json.Unmarshal([]byte(postJob), &job); err != nil {
+		// 反序列化失败
+		goto ERR
+	}
+
+	// 4.保存到Etcd
+	if oldJob, err = G_jobMgr.SaveJob(&job); err != nil {
+		goto ERR
+	}
+
+	// 5.返回正常应答
+	if bytes, err = common.BuildResponse(0, "success", oldJob); err != nil {
+		resp.Write(bytes)
+	}
+ERR:
+	// 返回异常应答
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err != nil {
+		resp.Write(bytes)
+	}
 }
 
 // 初始化服务
@@ -34,7 +72,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/save", handleJobSave)
 
 	// 启动HTTP监听
-	if listener, err = net.Listen("tcp", ":" + strconv.Itoa(G_Config.ApiPort)); err != nil {
+	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_Config.ApiPort)); err != nil {
 		return
 	}
 
