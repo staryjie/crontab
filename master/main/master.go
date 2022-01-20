@@ -21,6 +21,9 @@ func main() {
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
 	}
+
+	// 正常退出
+	return
 ERR:
 	fmt.Println(err)
 }
