@@ -50,9 +50,11 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	// 5.返回正常应答
-	if bytes, err = common.BuildResponse(0, "success", oldJob); err != nil {
+	if bytes, err = common.BuildResponse(0, "success", oldJob); err == nil {
 		resp.Write(bytes)
 	}
+
+	return
 ERR:
 	// 返回异常应答
 	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err != nil {
