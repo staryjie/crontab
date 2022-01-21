@@ -120,6 +120,38 @@ ERR:
 	}
 }
 
+// 强杀任务
+func handleJobKill(resp http.ResponseWriter, req *http.Request) {
+	var (
+		name string
+		bytes []byte
+		err error
+	)
+
+	// 解析POST表单
+	if err = req.ParseForm(); err != nil {
+		goto ERR
+	}
+
+	// 获取要杀死的任务
+	name = req.PostForm.Get("name")
+
+	// 杀死任务
+	if err = G_jobMgr.KillJob(name); err != nil {
+		goto ERR
+	}
+
+	// 正常响应
+	if bytes, err = common.BuildResponse(0, "success", nil); err == nil {
+		resp.Write(bytes)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	}
+}
+
 // 初始化服务
 func InitApiServer() (err error) {
 	var (
@@ -132,6 +164,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/save", handleJobSave)  // 保存任务
 	mux.HandleFunc("/job/delete", handleJobDelete)  // 删除任务
 	mux.HandleFunc("/job/list", handleJobList)  // 获取所有任务
+	mux.HandleFunc("/job/kill", handleJobKill)  // 强杀任务
 
 	// 启动HTTP监听
 	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_Config.ApiPort)); err != nil {
