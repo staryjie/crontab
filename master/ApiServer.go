@@ -50,14 +50,48 @@ func handleJobSave(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	// 5.返回正常应答
-	if bytes, err = common.BuildResponse(0, "success", oldJob); err == nil {  // 正常响应 err 应该为 nil
+	if bytes, err = common.BuildResponse(0, "success", oldJob); err == nil { // 正常响应 err 应该为 nil
 		resp.Write(bytes)
 	}
 
 	return
 ERR:
 	// 返回异常应答
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err != nil {
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	}
+}
+
+// 删除任务接口
+// POST /job/delete  name = job1
+func handleJobDelete(resp http.ResponseWriter, req *http.Request) {
+	var (
+		name   string
+		err    error
+		oldJob *common.Job
+		bytes  []byte
+	)
+
+	// 解析Form表单
+	if err = req.ParseForm(); err != nil {
+		goto ERR
+	}
+
+	// 获取到要删除的任务名称
+	name = req.PostForm.Get("name")
+
+	// 通过任务名去删除任务
+	if oldJob, err = G_jobMgr.DeleteJob(name); err != nil {
+		goto ERR
+	}
+
+	// 正常删除的应答
+	if bytes, err = common.BuildResponse(0, "success", oldJob); err == nil {
+		resp.Write(bytes)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	}
 }
@@ -72,6 +106,7 @@ func InitApiServer() (err error) {
 	// 初始化路由
 	mux = http.NewServeMux()
 	mux.HandleFunc("/job/save", handleJobSave)
+	mux.HandleFunc("/job/delete", handleJobDelete)
 
 	// 启动HTTP监听
 	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_Config.ApiPort)); err != nil {
