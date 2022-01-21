@@ -12,5 +12,8 @@
   "etcdEndpoints": ["81.68.229.87:2379"],
 
   "Etcd连接超时时间": "单位是毫秒",
-  "etcdDialTimeout": 5000
+  "etcdDialTimeout": 5000,
+
+  "Web页面根目录": "静态页面的根目录，前后端分离",
+  "webroot": "./webroot"
 }
