@@ -96,6 +96,30 @@ ERR:
 	}
 }
 
+// 获取所有任务的列表
+func handleJobList(resp http.ResponseWriter, req *http.Request) {
+	var (
+		jobList []*common.Job
+		bytes []byte
+		err error
+	)
+
+	// 获取任务列表
+	if jobList, err = G_jobMgr.ListJobs(); err != nil {
+		goto ERR
+	}
+
+	// 正常应答
+	if bytes, err = common.BuildResponse(0, "success", jobList); err == nil {
+		resp.Write(bytes)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil);err == nil {
+		resp.Write(bytes)
+	}
+}
+
 // 初始化服务
 func InitApiServer() (err error) {
 	var (
@@ -105,8 +129,9 @@ func InitApiServer() (err error) {
 	)
 	// 初始化路由
 	mux = http.NewServeMux()
-	mux.HandleFunc("/job/save", handleJobSave)
-	mux.HandleFunc("/job/delete", handleJobDelete)
+	mux.HandleFunc("/job/save", handleJobSave)  // 保存任务
+	mux.HandleFunc("/job/delete", handleJobDelete)  // 删除任务
+	mux.HandleFunc("/job/list", handleJobList)  // 获取所有任务
 
 	// 启动HTTP监听
 	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_Config.ApiPort)); err != nil {

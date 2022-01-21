@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/staryjie/crontab/common"
 	"time"
 )
@@ -56,9 +57,9 @@ func InitJobMgr() (err error) {
 func (jobMgr *JobMgr) SaveJob(job *common.Job) (oldJob *common.Job, err error) {
 	// 把任务保存到Etcd的 /cron/jobs/任务名 = json
 	var (
-		jobKey string
-		jobValue []byte
-		putResp *clientv3.PutResponse
+		jobKey    string
+		jobValue  []byte
+		putResp   *clientv3.PutResponse
 		oldJobObj common.Job
 	)
 
@@ -77,7 +78,7 @@ func (jobMgr *JobMgr) SaveJob(job *common.Job) (oldJob *common.Job, err error) {
 	if putResp.PrevKv != nil {
 		// 对旧值做反序列化
 		if err = json.Unmarshal(putResp.PrevKv.Value, &oldJobObj); err != nil {
-			err = nil  // 旧值反序列化失败也不影响新值的写入
+			err = nil // 旧值反序列化失败也不影响新值的写入
 			return
 		}
 		oldJob = &oldJobObj
@@ -88,8 +89,8 @@ func (jobMgr *JobMgr) SaveJob(job *common.Job) (oldJob *common.Job, err error) {
 // 删除任务
 func (jobMgr *JobMgr) DeleteJob(name string) (oldJob *common.Job, err error) {
 	var (
-		jobKey string
-		delResp *clientv3.DeleteResponse
+		jobKey    string
+		delResp   *clientv3.DeleteResponse
 		oldJobObj common.Job
 	)
 
@@ -109,6 +110,38 @@ func (jobMgr *JobMgr) DeleteJob(name string) (oldJob *common.Job, err error) {
 			return
 		}
 		oldJob = &oldJobObj
+	}
+	return
+}
+
+// 获取任务列表
+func (jobMgr *JobMgr) ListJobs() (jobList []*common.Job, err error) {
+	var (
+		dirKey  string
+		getResp *clientv3.GetResponse
+		kvPair  *mvccpb.KeyValue
+		job     *common.Job
+	)
+
+	// 任务保存目录
+	dirKey = common.JOB_SAVE_DIR
+
+	// 获取目录下所有任务信息
+	if getResp, err = G_jobMgr.kv.Get(context.TODO(), dirKey, clientv3.WithPrefix()); err != nil {
+		return
+	}
+
+	// 初始化任务列表
+	jobList = make([]*common.Job, 0)
+
+	// 遍历所有任务，进行反序列化
+	for _, kvPair = range getResp.Kvs {
+		job = &common.Job{}
+		if err = json.Unmarshal(kvPair.Value, job); err != nil {
+			err = nil
+			continue
+		}
+		jobList = append(jobList, job)
 	}
 	return
 }
