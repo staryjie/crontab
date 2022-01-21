@@ -63,7 +63,7 @@ func (jobMgr *JobMgr) SaveJob(job *common.Job) (oldJob *common.Job, err error) {
 	)
 
 	// Etcd保存的Key
-	jobKey = "/cron/jobs/" + job.Name
+	jobKey = common.JOB_SAVE_DIR + job.Name
 	// 任务信息 json
 	if jobValue, err = json.Marshal(job); err != nil {
 		return
@@ -94,7 +94,7 @@ func (jobMgr *JobMgr) DeleteJob(name string) (oldJob *common.Job, err error) {
 	)
 
 	// Etcd中保存的Key
-	jobKey = "/cron/jobs/" + name
+	jobKey = common.JOB_SAVE_DIR + name
 
 	// 从Etcd中删除
 	if delResp, err = G_jobMgr.kv.Delete(context.TODO(), jobKey, clientv3.WithPrevKV()); err != nil {
