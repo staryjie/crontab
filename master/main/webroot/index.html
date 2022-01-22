@@ -22,7 +22,8 @@
     <!--功能按钮-->
     <div class="row">
         <div class="col-md-12">
-            <button type="button" class="btn btn-primary">新建任务</button>
+            <button type="button" class="btn btn-primary" id="new-job">新建任务</button>
+            <button type="button" class="btn btn-success" id="list-worker">健康节点</button>
         </div>
     </div>
 
@@ -34,9 +35,9 @@
                     <table id="job-list" class="table table-striped">
                         <thead>
                         <tr>
-                            <th class="col-md-3">任务名称</th>
-                            <th class="col-md-3">Shell命令</th>
-                            <th class="col-md-3">Cron表达式</th>
+                            <th class="col-md-2">任务名称</th>
+                            <th class="col-md-6">Shell命令</th>
+                            <th class="col-md-2">Cron表达式</th>
                             <th class="col-md-3">任务操作</th>
                         </tr>
                         </thead>
@@ -85,7 +86,7 @@
                             <label for="edit-command">Shell命令</label>
                             <input type="text" class="form-control" id="edit-command" placeholder="Shell命令">
                         </div>
-                        <div class="fotm-group">
+                        <div class="form-group">
                             <label for="edit-cronExpr">Cron表达式</label>
                             <input type="text" class="form-control" id="edit-cronExpr" placeholder="Cron表达式">
                         </div>
@@ -102,8 +103,17 @@
 </div>
 <script>
     $(document).ready(function () {
-        // 1.绑定按钮的时间处理函数
+        // 1.绑定按钮的事件处理函数
         // js委托机制 DOM冒泡事件的一个关键原理
+        // 新建任务
+        $('#new-job').on('click', function () {
+            $('#edit-name').val("")
+            $('#edit-command').val("")
+            $('#edit-cronExpr').val("")
+
+            // 弹出模态框
+            $('#edit-modal').modal('show')
+        })
         // 编辑任务
         $("#job-list").on("click", ".edit-job", function (event) {
             // 获取当前job信息，赋值给模态框的input
