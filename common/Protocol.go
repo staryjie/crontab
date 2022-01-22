@@ -9,14 +9,14 @@ type Job struct {
 	CronExpr string `json:"cronExpr"` // cron表达式
 }
 
-// HTP接口应答
+// HTTP接口应答
 type Response struct {
 	Errno int `json:"errno"`
 	Msg string `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
-// 应答方法
+// 应答方法,构建一个应答
 func BuildResponse(errno int, msg string, data interface{}) (resp []byte, err error) {
 	// 1.定义一个Response对象
 	var (
