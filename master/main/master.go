@@ -15,7 +15,7 @@ var (
 // 解析命令行参数
 func initArgs() {
 	// master -config master.json
-	flag.StringVar(&configFile, "config, c", "./master.json", "Enter program configuration file")
+	flag.StringVar(&configFile, "config", "./master.json", "Enter program configuration file")
 	flag.Parse()
 }
 
