@@ -154,7 +154,16 @@
 
         // 强杀任务
         $("#job-list").on("click", ".kill-job", function (event) {
-            console.log("强杀按钮");
+            var jobName = $(this).parents('tr').children('.job-name').text()
+            $.ajax({
+                url: '/job/kill',
+                type: 'post',
+                dataType: 'json',
+                data: {name: jobName},
+                complete: function () {
+                    window.location.reload()
+                }
+            })
         });
 
         // 查看日志
