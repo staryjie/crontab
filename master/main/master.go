@@ -14,8 +14,8 @@ var (
 
 // 解析命令行参数
 func initArgs() {
-	// master -config master.json
-	flag.StringVar(&configFile, "config", "./master.json", "Enter program configuration file")
+	// master -config master.json  生产环境建议填写绝对路径，因为你无法控制用户从哪里启动你的程序
+	flag.StringVar(&configFile, "config", "/Users/staryjie/go/src/github.com/staryjie/crontab/master/main/master.json", "Enter program configuration file")
 	flag.Parse()
 }
 
@@ -51,6 +51,8 @@ func main() {
 
 	// 正常退出
 	// 测试使用，保证主进程不退出
+	fmt.Printf("[%v] Crontab Server started ...\n", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("Please Visit http://127.0.0.1:%d/\n",master.G_Config.ApiPort)
 	for {
 		time.Sleep(1 * time.Second)
 	}
