@@ -56,7 +56,7 @@ func (scheduler *Scheduler) TrySchedule() (scheduleAfer time.Duration) {
 		if jobPlan.NextTime.Before(now) || jobPlan.NextTime.Equal(now) {
 			// 2.过期的任务马上执行
 			// TODO: 尝试执行任务
-			fmt.Println("执行任务:", jobPlan.Job.Name)
+			fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "执行任务:", jobPlan.Job.Name)
 			// 更新下一次调度时间
 			jobPlan.NextTime = jobPlan.Expr.Next(now)
 		}
