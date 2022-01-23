@@ -71,7 +71,7 @@ func (jobMgr *JobMgr) SaveJob(job *common.Job) (oldJob *common.Job, err error) {
 	}
 
 	// 保存到Etcd
-	if putResp, err = G_jobMgr.kv.Put(context.TODO(), jobKey, string(jobValue), clientv3.WithPrevKV()); err != nil {
+	if putResp, err = jobMgr.kv.Put(context.TODO(), jobKey, string(jobValue), clientv3.WithPrevKV()); err != nil {
 		return
 	}
 	// 如果是更新，那么返回旧值
@@ -98,7 +98,7 @@ func (jobMgr *JobMgr) DeleteJob(name string) (oldJob *common.Job, err error) {
 	jobKey = common.JOB_SAVE_DIR + name
 
 	// 从Etcd中删除
-	if delResp, err = G_jobMgr.kv.Delete(context.TODO(), jobKey, clientv3.WithPrevKV()); err != nil {
+	if delResp, err = jobMgr.kv.Delete(context.TODO(), jobKey, clientv3.WithPrevKV()); err != nil {
 		return
 	}
 
@@ -127,7 +127,7 @@ func (jobMgr *JobMgr) ListJobs() (jobList []*common.Job, err error) {
 	dirKey = common.JOB_SAVE_DIR
 
 	// 获取目录下所有任务信息
-	if getResp, err = G_jobMgr.kv.Get(context.TODO(), dirKey, clientv3.WithPrefix()); err != nil {
+	if getResp, err = jobMgr.kv.Get(context.TODO(), dirKey, clientv3.WithPrefix()); err != nil {
 		return
 	}
 
@@ -159,7 +159,7 @@ func (jobMgr *JobMgr) KillJob(name string) (err error) {
 	killKey = common.JOB_KILLER_DIR + name
 
 	// worker监听 /cron/killer/目录下的put事件，创建租约并让他自动过期
-	if leaseGrantResp, err = G_jobMgr.lease.Grant(context.TODO(), common.KILL_JOB_LEASE_TTL); err != nil {
+	if leaseGrantResp, err = jobMgr.lease.Grant(context.TODO(), common.KILL_JOB_LEASE_TTL); err != nil {
 		return
 	}
 
@@ -167,7 +167,7 @@ func (jobMgr *JobMgr) KillJob(name string) (err error) {
 	leaseId = leaseGrantResp.ID
 
 	// 设置killer标记
-	if _, err = G_jobMgr.kv.Put(context.TODO(), killKey, "", clientv3.WithLease(leaseId)); err != nil {
+	if _, err = jobMgr.kv.Put(context.TODO(), killKey, "", clientv3.WithLease(leaseId)); err != nil {
 		return
 	}
 	return
