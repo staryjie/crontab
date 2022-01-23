@@ -20,42 +20,6 @@ var (
 	G_jobMgr *JobMgr
 )
 
-// 初始化管理器
-func InitJobMgr() (err error) {
-	var (
-		config clientv3.Config
-		client *clientv3.Client
-		kv     clientv3.KV
-		lease  clientv3.Lease
-		watcher clientv3.Watcher
-	)
-
-	// 初始化配置
-	config = clientv3.Config{
-		Endpoints:   G_Config.EtcdEndpoints,                                     // Etcd集群
-		DialTimeout: time.Duration(G_Config.EtcdDialTimeout) * time.Millisecond, // 连接超时时间
-	}
-
-	// 建立连接
-	if client, err = clientv3.New(config); err != nil {
-		return
-	}
-
-	// 得到kv和lease API子集
-	kv = clientv3.NewKV(client)
-	lease = clientv3.NewLease(client)
-	watcher = clientv3.NewWatcher(client)
-
-	// 赋值单例
-	G_jobMgr = &JobMgr{
-		client: client,
-		kv:     kv,
-		lease:  lease,
-		watcher: watcher,
-	}
-	return
-}
-
 // 监听任务变化
 func (JobMgr *JobMgr) watchJobs() (err error) {
 	var (
@@ -96,10 +60,10 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 			for watchEvent = range watchResp.Events {
 				switch watchEvent.Type {
 				case mvccpb.PUT:  // 任务保存事件
-				// 反解json
-				if job, err = common.UnpackJob(watchEvent.Kv.Value); err != nil {
-					continue  // 忽略该次更新事件
-				}
+					// 反解json
+					if job, err = common.UnpackJob(watchEvent.Kv.Value); err != nil {
+						continue  // 忽略该次更新事件
+					}
 					// 构造一个更新事件
 					jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
 					// TODO: 反序列化job，推一个更新事件给调度协程
@@ -114,6 +78,46 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 			}
 		}
 	}()
+
+	return
+}
+
+// 初始化管理器
+func InitJobMgr() (err error) {
+	var (
+		config clientv3.Config
+		client *clientv3.Client
+		kv     clientv3.KV
+		lease  clientv3.Lease
+		watcher clientv3.Watcher
+	)
+
+	// 初始化配置
+	config = clientv3.Config{
+		Endpoints:   G_Config.EtcdEndpoints,                                     // Etcd集群
+		DialTimeout: time.Duration(G_Config.EtcdDialTimeout) * time.Millisecond, // 连接超时时间
+	}
+
+	// 建立连接
+	if client, err = clientv3.New(config); err != nil {
+		return
+	}
+
+	// 得到kv和lease API子集
+	kv = clientv3.NewKV(client)
+	lease = clientv3.NewLease(client)
+	watcher = clientv3.NewWatcher(client)
+
+	// 赋值单例
+	G_jobMgr = &JobMgr{
+		client: client,
+		kv:     kv,
+		lease:  lease,
+		watcher: watcher,
+	}
+
+	// 启动任务监听
+	G_jobMgr.watchJobs()
 
 	return
 }
