@@ -21,7 +21,7 @@ var (
 )
 
 // 监听任务变化
-func (JobMgr *JobMgr) watchJobs() (err error) {
+func (jobMgr *JobMgr) watchJobs() (err error) {
 	var (
 		getResp            *clientv3.GetResponse
 		kvpair             *mvccpb.KeyValue
@@ -34,7 +34,7 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 		jobEvent           *common.JobEvent
 	)
 	// 1. get /cron/jobs/ 下所有任务,并且获取当前集群Revision
-	if getResp, err = G_jobMgr.kv.Get(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithPrefix()); err != nil {
+	if getResp, err = jobMgr.kv.Get(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithPrefix()); err != nil {
 		return
 	}
 
@@ -43,7 +43,9 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 		// 反序列json 得到job
 		if job, err = common.UnpackJob(kvpair.Value); err == nil { // 反解成功
 			jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
-			// TODO: 把任务同步给调度协程，完成任务调度
+			// 把任务同步给调度协程，完成任务调度
+			//fmt.Println((*jobEvent).EventType, *(jobEvent).Job)
+			G_scheduler.PushJobEvent(jobEvent)
 		}
 	}
 
@@ -53,7 +55,7 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 		watchStartRevision = getResp.Header.Revision + 1
 
 		// 启动监听 /cron/jobs/目录的后续变化
-		watchChan = G_jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRevision), clientv3.WithPrefix())
+		watchChan = jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRevision), clientv3.WithPrefix())
 
 		// 处理监听事件
 		for watchResp = range watchChan {
@@ -66,14 +68,18 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 					}
 					// 构造一个更新事件
 					jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
-					// TODO: 反序列化job，推一个更新事件给调度协程
+					// 推一个更新事件给调度协程
+					//fmt.Println((*jobEvent).EventType, *(jobEvent).Job)
+					G_scheduler.PushJobEvent(jobEvent)
 				case mvccpb.DELETE: // 任务删除事件
 					// delete /cron/jobs/job-name
 					jobName = common.ExtractJobName(string(watchEvent.Kv.Key))
 					job = &common.Job{Name: jobName} // 删除任务只需要jobName即可
 					// 构造一个删除事件
 					jobEvent = common.BuildJobEvent(common.JOV_EVENT_DELETE, job)
-					// TODO: 推送一个删除事件给调度协程
+					// 推送一个删除事件给调度协程
+					//fmt.Println((*jobEvent).EventType, *(jobEvent).Job)
+					G_scheduler.PushJobEvent(jobEvent)
 				}
 			}
 		}
