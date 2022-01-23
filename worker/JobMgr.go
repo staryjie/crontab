@@ -57,7 +57,7 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 
 		// 处理监听事件
 		for watchResp = range watchChan {
-			for watchEvent = range watchResp.Events {
+			for _,watchEvent = range watchResp.Events {
 				switch watchEvent.Type {
 				case mvccpb.PUT: // 任务保存事件
 					// 反解json
