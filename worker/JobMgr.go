@@ -10,9 +10,9 @@ import (
 
 // 任务管理器
 type JobMgr struct {
-	client *clientv3.Client
-	kv     clientv3.KV
-	lease  clientv3.Lease
+	client  *clientv3.Client
+	kv      clientv3.KV
+	lease   clientv3.Lease
 	watcher clientv3.Watcher
 }
 
@@ -23,15 +23,15 @@ var (
 // 监听任务变化
 func (JobMgr *JobMgr) watchJobs() (err error) {
 	var (
-		getResp *clientv3.GetResponse
-		kvpair *mvccpb.KeyValue
-		job *common.Job
+		getResp            *clientv3.GetResponse
+		kvpair             *mvccpb.KeyValue
+		job                *common.Job
 		watchStartRevision int64
-		watchChan clientv3.WatchChan
-		watchResp clientv3.WatchResponse
-		watchEvent *clientv3.Event
-		jobName string
-		jobEvent *common.JobEvent
+		watchChan          clientv3.WatchChan
+		watchResp          clientv3.WatchResponse
+		watchEvent         *clientv3.Event
+		jobName            string
+		jobEvent           *common.JobEvent
 	)
 	// 1. get /cron/jobs/ 下所有任务,并且获取当前集群Revision
 	if getResp, err = G_jobMgr.kv.Get(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithPrefix()); err != nil {
@@ -41,14 +41,14 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 	// 遍历任务
 	for _, kvpair = range getResp.Kvs {
 		// 反序列json 得到job
-		if job, err = common.UnpackJob(kvpair.Value); err == nil {  // 反解成功
+		if job, err = common.UnpackJob(kvpair.Value); err == nil { // 反解成功
 			jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
 			// TODO: 把任务同步给调度协程，完成任务调度
 		}
 	}
 
 	// 2.从该Revision开始监听事件变化
-	go func(){
+	go func() {
 		// GET时刻的下一个版本
 		watchStartRevision = getResp.Header.Revision + 1
 
@@ -59,18 +59,18 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 		for watchResp = range watchChan {
 			for watchEvent = range watchResp.Events {
 				switch watchEvent.Type {
-				case mvccpb.PUT:  // 任务保存事件
+				case mvccpb.PUT: // 任务保存事件
 					// 反解json
 					if job, err = common.UnpackJob(watchEvent.Kv.Value); err != nil {
-						continue  // 忽略该次更新事件
+						continue // 忽略该次更新事件
 					}
 					// 构造一个更新事件
 					jobEvent = common.BuildJobEvent(common.JOB_EVENT_SAVE, job)
 					// TODO: 反序列化job，推一个更新事件给调度协程
-				case mvccpb.DELETE:  // 任务删除事件
+				case mvccpb.DELETE: // 任务删除事件
 					// delete /cron/jobs/job-name
 					jobName = common.ExtractJobName(string(watchEvent.Kv.Key))
-					job = &common.Job{Name: jobName}  // 删除任务只需要jobName即可
+					job = &common.Job{Name: jobName} // 删除任务只需要jobName即可
 					// 构造一个删除事件
 					jobEvent = common.BuildJobEvent(common.JOV_EVENT_DELETE, job)
 					// TODO: 推送一个删除事件给调度协程
@@ -85,10 +85,10 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 // 初始化管理器
 func InitJobMgr() (err error) {
 	var (
-		config clientv3.Config
-		client *clientv3.Client
-		kv     clientv3.KV
-		lease  clientv3.Lease
+		config  clientv3.Config
+		client  *clientv3.Client
+		kv      clientv3.KV
+		lease   clientv3.Lease
 		watcher clientv3.Watcher
 	)
 
@@ -110,9 +110,9 @@ func InitJobMgr() (err error) {
 
 	// 赋值单例
 	G_jobMgr = &JobMgr{
-		client: client,
-		kv:     kv,
-		lease:  lease,
+		client:  client,
+		kv:      kv,
+		lease:   lease,
 		watcher: watcher,
 	}
 

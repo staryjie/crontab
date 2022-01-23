@@ -14,15 +14,15 @@ type Job struct {
 
 // HTTP接口应答
 type Response struct {
-	Errno int `json:"errno"`
-	Msg string `json:"msg"`
-	Data interface{} `json:"data"`
+	Errno int         `json:"errno"`
+	Msg   string      `json:"msg"`
+	Data  interface{} `json:"data"`
 }
 
 // 事件变化
 type JobEvent struct {
 	EventType int // SAVE DELETE
-	Job *Job
+	Job       *Job
 }
 
 // 应答方法,构建一个应答
@@ -59,7 +59,7 @@ func UnpackJob(value []byte) (ret *Job, err error) {
 func BuildJobEvent(eventType int, job *Job) (jobEvent *JobEvent) {
 	return &JobEvent{
 		EventType: eventType,
-		Job: job,
+		Job:       job,
 	}
 }
 

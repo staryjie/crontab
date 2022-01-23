@@ -150,9 +150,9 @@ func (jobMgr *JobMgr) ListJobs() (jobList []*common.Job, err error) {
 func (jobMgr *JobMgr) KillJob(name string) (err error) {
 	// 更新 /cron/killer/任务名
 	var (
-		killKey string
+		killKey        string
 		leaseGrantResp *clientv3.LeaseGrantResponse
-		leaseId clientv3.LeaseID
+		leaseId        clientv3.LeaseID
 	)
 
 	// 强杀任务路径

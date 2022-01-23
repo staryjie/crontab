@@ -43,20 +43,20 @@
                         </thead>
                         <tbody>
                         <!--一个任务-->
-<!--                        <tr>-->
-<!--                            <td class="job-name">job1</td>-->
-<!--                            <td class="job-command">echo hello</td>-->
-<!--                            <td class="job-cronExpr">* * * * *</td>-->
-<!--                            <td>-->
-<!--                                &lt;!&ndash;bootstrap按钮组&ndash;&gt;-->
-<!--                                <div class="btn-toolbar">-->
-<!--                                    <button class="btn btn-info edit-job">编辑</button>-->
-<!--                                    <button class="btn btn-danger delete-job">删除</button>-->
-<!--                                    <button class="btn btn-warning kill-job">强杀</button>-->
-<!--                                    <button class="btn btn-success log-job">强杀</button>-->
-<!--                                </div>-->
-<!--                            </td>-->
-<!--                        </tr>-->
+                        <!--                        <tr>-->
+                        <!--                            <td class="job-name">job1</td>-->
+                        <!--                            <td class="job-command">echo hello</td>-->
+                        <!--                            <td class="job-cronExpr">* * * * *</td>-->
+                        <!--                            <td>-->
+                        <!--                                &lt;!&ndash;bootstrap按钮组&ndash;&gt;-->
+                        <!--                                <div class="btn-toolbar">-->
+                        <!--                                    <button class="btn btn-info edit-job">编辑</button>-->
+                        <!--                                    <button class="btn btn-danger delete-job">删除</button>-->
+                        <!--                                    <button class="btn btn-warning kill-job">强杀</button>-->
+                        <!--                                    <button class="btn btn-success log-job">强杀</button>-->
+                        <!--                                </div>-->
+                        <!--                            </td>-->
+                        <!--                        </tr>-->
                         </tbody>
                     </table>
                 </div>
@@ -126,7 +126,11 @@
         });
         // 保存任务
         $('#sava-job').on('click', function () {
-            var jobInfo = {name: $('#edit-name').val(), command: $('#edit-command').val(), cronExpr: $('#edit-cronExpr').val()}
+            var jobInfo = {
+                name: $('#edit-name').val(),
+                command: $('#edit-command').val(),
+                cronExpr: $('#edit-cronExpr').val()
+            }
             $.ajax({
                 url: '/job/save',
                 type: 'post',
@@ -203,6 +207,7 @@
                 }
             })
         }
+
         rebuildJobList();  // 调用函数刷新任务列表
     })
 </script>

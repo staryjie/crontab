@@ -100,8 +100,8 @@ ERR:
 func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	var (
 		jobList []*common.Job
-		bytes []byte
-		err error
+		bytes   []byte
+		err     error
 	)
 
 	// 获取任务列表
@@ -115,7 +115,7 @@ func handleJobList(resp http.ResponseWriter, req *http.Request) {
 	}
 	return
 ERR:
-	if bytes, err = common.BuildResponse(-1, err.Error(), nil);err == nil {
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
 		resp.Write(bytes)
 	}
 }
@@ -123,9 +123,9 @@ ERR:
 // 强杀任务
 func handleJobKill(resp http.ResponseWriter, req *http.Request) {
 	var (
-		name string
+		name  string
 		bytes []byte
-		err error
+		err   error
 	)
 
 	// 解析POST表单
@@ -155,18 +155,18 @@ ERR:
 // 初始化服务
 func InitApiServer() (err error) {
 	var (
-		mux        *http.ServeMux
-		listener   net.Listener
-		httpServer *http.Server
-		staticDir http.Dir  // 静态文件根目录
-		staticHandler http.Handler  // 静态文件HTTP回调
+		mux           *http.ServeMux
+		listener      net.Listener
+		httpServer    *http.Server
+		staticDir     http.Dir     // 静态文件根目录
+		staticHandler http.Handler // 静态文件HTTP回调
 	)
 	// 初始化路由
 	mux = http.NewServeMux()
-	mux.HandleFunc("/job/save", handleJobSave)  // 保存任务
-	mux.HandleFunc("/job/delete", handleJobDelete)  // 删除任务
-	mux.HandleFunc("/job/list", handleJobList)  // 获取所有任务
-	mux.HandleFunc("/job/kill", handleJobKill)  // 强杀任务
+	mux.HandleFunc("/job/save", handleJobSave)     // 保存任务
+	mux.HandleFunc("/job/delete", handleJobDelete) // 删除任务
+	mux.HandleFunc("/job/list", handleJobList)     // 获取所有任务
+	mux.HandleFunc("/job/kill", handleJobKill)     // 强杀任务
 
 	// http支持静态文件路由
 	staticDir = http.Dir(G_Config.WebRoot)
