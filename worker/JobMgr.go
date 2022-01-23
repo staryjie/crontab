@@ -53,7 +53,7 @@ func (JobMgr *JobMgr) watchJobs() (err error) {
 		watchStartRevision = getResp.Header.Revision + 1
 
 		// 启动监听 /cron/jobs/目录的后续变化
-		watchChan = G_jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRevision))
+		watchChan = G_jobMgr.watcher.Watch(context.TODO(), common.JOB_SAVE_DIR, clientv3.WithRev(watchStartRevision), clientv3.WithPrefix())
 
 		// 处理监听事件
 		for watchResp = range watchChan {
