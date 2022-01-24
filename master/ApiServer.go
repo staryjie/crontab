@@ -175,10 +175,10 @@ func handleJobLog(resp http.ResponseWriter, req *http.Request) {
 	skipParam = req.Form.Get("skip")
 	limitParam = req.Form.Get("limit")
 	if skip, err = strconv.Atoi(skipParam); err != nil {
-		skip = 0
+		skip = common.LOG_SKIP_NUM
 	}
 	if limit, err = strconv.Atoi(limitParam); err != nil {
-		limit = 5
+		limit = common.LOG_LIMIT_NUM
 	}
 
 	if logArr, err = G_logMgr.ListLog(name, skip, limit); err != nil {

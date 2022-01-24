@@ -21,4 +21,10 @@ const (
 
 	// 人物锁目录
 	JOB_LOCK_DIR = "/cron/lock/"
+
+	// 查询日志条数
+	LOG_LIMIT_NUM = 10
+
+	// 从第几条日志开始查询
+	LOG_SKIP_NUM = 0
 )
