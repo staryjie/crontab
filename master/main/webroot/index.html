@@ -65,6 +65,7 @@
     </div>
 
     <!--模态框 position: fixed-->
+    <!--编辑任务的模态框-->
     <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -80,7 +81,8 @@
                     <form>
                         <div class="form-group">
                             <label for="edit-name">任务名称</label>
-                            <input type="text" class="form-control" id="edit-name" placeholder="任务名称">
+                            <!-- 编辑任务的时候任务名应该是不可编辑的 -->
+                            <input type="text" class="form-control" id="edit-name" placeholder="任务名称" disabled>
                         </div>
                         <div class="form-group">
                             <label for="edit-command">Shell命令</label>
@@ -100,6 +102,44 @@
             </div>
         </div>
     </div>
+
+    <!--新建任务的模态框-->
+    <div class="modal fade" id="new-job-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!--模态框头-->
+                <div class="modal-header">
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">新建任务</h4>
+                </div>
+                <!--模态框体-->
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="edit-name">任务名称</label>
+                            <!-- 新建任务的时候任务名应该是不可编辑的 -->
+                            <input type="text" class="form-control" id="new-job-name" placeholder="任务名称">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-command">Shell命令</label>
+                            <input type="text" class="form-control" id="new-job-command" placeholder="Shell命令">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-cronExpr">Cron表达式</label>
+                            <input type="text" class="form-control" id="new-job-cronExpr" placeholder="Cron表达式">
+                        </div>
+                    </form>
+                </div>
+                <!--模态框脚-->
+                <div class="modal-footer">
+                    <button class="btn btn-default" type="button" data-dismiss="modal">关闭</button>
+                    <button class="btn btn-primary" type="button" id="new-job-save">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     $(document).ready(function () {
@@ -107,12 +147,29 @@
         // js委托机制 DOM冒泡事件的一个关键原理
         // 新建任务
         $('#new-job').on('click', function () {
-            $('#edit-name').val("")
-            $('#edit-command').val("")
-            $('#edit-cronExpr').val("")
+            $('#new-job-name').val("")
+            $('#new-job-command').val("")
+            $('#new-job-cronExpr').val("")
 
             // 弹出模态框
-            $('#edit-modal').modal('show')
+            $('#new-job-modal').modal('show')
+        })
+        // 新建任务保存
+        $('#new-job-save').on('click', function () {
+            var jobInfo = {
+                name: $('#new-job-name').val(),
+                command: $('#new-job-command').val(),
+                cronExpr: $('#new-job-cronExpr').val()
+            }
+            $.ajax({
+                url: '/job/save',
+                type: 'post',
+                dataType: 'json',
+                data: {job: JSON.stringify(jobInfo)},
+                complete: function () {
+                    window.location.reload();
+                }
+            })
         })
         // 编辑任务
         $("#job-list").on("click", ".edit-job", function (event) {
