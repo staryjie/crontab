@@ -106,8 +106,11 @@ func (scheduler *Scheduler) TrySchedule() (scheduleAfer time.Duration) {
 func (scheduler *Scheduler) handlerJobResult(jobResult *common.JobExecuteResult) {
 	// 删除任务执行表中的该任务
 	delete(scheduler.jobExecutingTable, jobResult.ExecuteInfo.Job.Name)
-
-	fmt.Println("任务执行完成", jobResult.ExecuteInfo.Job.Name, strings.TrimSpace(string(jobResult.OutPut)), jobResult.Err)
+	if jobResult.Err != nil {
+		fmt.Println("任务执行异常", jobResult.Err.Error())
+	} else {
+		fmt.Println("任务执行完成", jobResult.ExecuteInfo.Job.Name, strings.TrimSpace(string(jobResult.OutPut)), jobResult.Err)
+	}
 }
 
 // 调度协程

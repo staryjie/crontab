@@ -59,7 +59,7 @@ func (jobMgr *JobMgr) watchJobs() (err error) {
 
 		// 处理监听事件
 		for watchResp = range watchChan {
-			for _,watchEvent = range watchResp.Events {
+			for _, watchEvent = range watchResp.Events {
 				switch watchEvent.Type {
 				case mvccpb.PUT: // 任务保存事件
 					// 反解json
@@ -124,6 +124,14 @@ func InitJobMgr() (err error) {
 
 	// 启动任务监听
 	G_jobMgr.watchJobs()
+
+	return
+}
+
+// 创建任务执行锁
+func (jobMgr *JobMgr) CreateJobLock(jobName string) (jobLock *JobLock) {
+	// 返回锁
+	jobLock = InitJobLock(jobName, jobMgr.kv, jobMgr.lease)
 
 	return
 }

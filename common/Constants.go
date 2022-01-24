@@ -18,4 +18,7 @@ const (
 
 	// 任务杀死事件
 	JOB_EVENT_KILL = 3
+
+	// 人物锁目录
+	JOB_LOCK_DIR = "/cron/lock/"
 )
