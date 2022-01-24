@@ -43,7 +43,7 @@ func (scheduler *Scheduler) handlerJobEvent(jobEvent *common.JobEvent) {
 		// 取消Command执行
 		// 判断任务是否在执行中
 		if jobExecuteInfo, jobExecuting = scheduler.jobExecutingTable[jobEvent.Job.Name]; jobExecuting {
-			jobExecuteInfo.CancelFunc()  // 取消执行
+			jobExecuteInfo.CancelFunc() // 取消执行
 		}
 	}
 }
@@ -112,8 +112,32 @@ func (scheduler *Scheduler) TrySchedule() (scheduleAfer time.Duration) {
 
 // 处理任务执行结果
 func (scheduler *Scheduler) handlerJobResult(jobResult *common.JobExecuteResult) {
+	var (
+		jobLog *common.JobLog
+	)
 	// 删除任务执行表中的该任务
 	delete(scheduler.jobExecutingTable, jobResult.ExecuteInfo.Job.Name)
+
+	// 生成任务执行日志
+	if jobResult.Err != common.ERR_LOCK_ALREADY_REQUIRED {
+		jobLog = &common.JobLog{
+			JobName:      jobResult.ExecuteInfo.Job.Name,
+			Command:      jobResult.ExecuteInfo.Job.Command,
+			Output:       string(jobResult.OutPut),
+			PlanTime:     jobResult.ExecuteInfo.PlanTime.UnixNano() / 1000 / 1000,
+			ScheduleTime: jobResult.ExecuteInfo.RealTime.UnixNano() / 1000 / 1000,
+			StartTime:    jobResult.StartTime.UnixNano() / 1000 / 1000,
+			EndTime:      jobResult.EndTime.UnixNano() / 1000 / 1000,
+		}
+		if jobResult.Err != nil {
+			jobLog.Err = jobResult.Err.Error()
+		} else {
+			jobLog.Err = ""
+		}
+		// 将日志推送给MongoDB
+		G_logSink.Append(jobLog)
+	}
+
 	if jobResult.Err != nil {
 		fmt.Println("任务执行异常", jobResult.Err.Error())
 	} else {

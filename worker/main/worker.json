@@ -3,5 +3,23 @@
   "etcdEndpoints": ["81.68.229.87:2379"],
 
   "Etcd连接超时时间": "单位是毫秒",
-  "etcdDialTimeout": 5000
+  "etcdDialTimeout": 5000,
+
+  "MongoDB地址": "mongodb URI",
+  "mongodbUri": "mongodb://81.68.229.87:27078",
+
+  "MongoDB连接超时时间": "单位毫秒",
+  "mongodbCollectTimeout": 5000,
+
+  "MongoDB存储日志的db": "cron",
+  "jobLogStoreDb": "cron",
+
+  "MongoDB存储日志的集合": "log",
+  "jobLogStoreCollection": "log",
+
+  "日志批次大小": "为了减少MongoDB网络往返次数，打包成一批后一次性写入",
+  "jobLogBatchSize": 100,
+
+  "日志自动提交超时时间": "在日志批次未达到阈值之前，超时之后，未达到指定数目该批次的日志也会自动提交",
+  "jobLogCommitTimeout": 1000
 }
