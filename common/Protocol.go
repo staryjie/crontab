@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gorhill/cronexpr"
 	"strings"
@@ -32,6 +33,24 @@ type JobSchedulePlan struct {
 	Job      *Job                 // 调度的任务信息
 	Expr     *cronexpr.Expression // cronexpr库解析好的cron表达式
 	NextTime time.Time            // 任务下次执行时间
+}
+
+// 任务执行状态信息
+type JobExecuteInfo struct {
+	Job        *Job               // 任务信息
+	PlanTime   time.Time          // 调度理论执行时间
+	RealTime   time.Time          // 真正实际执行时间
+	CancelCtx  context.Context    // 任务command的context
+	CancelFunc context.CancelFunc // 用于取消command执行的cancel函数
+}
+
+// 任务执行结果
+type JobExecuteResult struct {
+	ExecuteInfo *JobExecuteInfo // 执行状态信息
+	OutPut      []byte          // 输出信息
+	Err         error           // 脚本执行错误信息
+	StartTime   time.Time       // 启动时间
+	EndTime     time.Time       // 执行结束时间
 }
 
 // 应答方法,构建一个应答
@@ -77,7 +96,6 @@ func ExtractJobName(jobKey string) string {
 	return strings.TrimPrefix(jobKey, JOB_SAVE_DIR)
 }
 
-
 // 构造执行计划
 func BuildJobSchedulePlan(job *Job) (jobSchedulePlan *JobSchedulePlan, err error) {
 	var (
@@ -89,10 +107,20 @@ func BuildJobSchedulePlan(job *Job) (jobSchedulePlan *JobSchedulePlan, err error
 	}
 	// 生成任务调度计划对象
 	jobSchedulePlan = &JobSchedulePlan{
-		Job: job,
-		Expr: expr,
+		Job:      job,
+		Expr:     expr,
 		NextTime: expr.Next(time.Now()),
 	}
 
+	return
+}
+
+// 构造执行状态信息
+func BuildJobExecuteInfo(jobSchedulerPlan *JobSchedulePlan) (jobExecuteInfo *JobExecuteInfo) {
+	jobExecuteInfo = &JobExecuteInfo{
+		Job:      jobSchedulerPlan.Job,
+		PlanTime: jobSchedulerPlan.NextTime,
+		RealTime: time.Now(),
+	}
 	return
 }
