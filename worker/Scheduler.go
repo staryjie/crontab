@@ -23,6 +23,8 @@ var (
 func (scheduler *Scheduler) handlerJobEvent(jobEvent *common.JobEvent) {
 	var (
 		jobSchedulePlan *common.JobSchedulePlan
+		jobExecuteInfo  *common.JobExecuteInfo
+		jobExecuting    bool
 		jobExisted      bool
 		err             error
 	)
@@ -36,6 +38,12 @@ func (scheduler *Scheduler) handlerJobEvent(jobEvent *common.JobEvent) {
 	case common.JOV_EVENT_DELETE: // 删除事件
 		if jobSchedulePlan, jobExisted = scheduler.jobPlanTable[jobEvent.Job.Name]; jobExisted {
 			delete(scheduler.jobPlanTable, jobEvent.Job.Name)
+		}
+	case common.JOB_EVENT_KILL: // 强杀任务事件
+		// 取消Command执行
+		// 判断任务是否在执行中
+		if jobExecuteInfo, jobExecuting = scheduler.jobExecutingTable[jobEvent.Job.Name]; jobExecuting {
+			jobExecuteInfo.CancelFunc()  // 取消执行
 		}
 	}
 }

@@ -96,6 +96,11 @@ func ExtractJobName(jobKey string) string {
 	return strings.TrimPrefix(jobKey, JOB_SAVE_DIR)
 }
 
+// 从Etcd的key中提要杀死的取任务名
+func ExtractKillerName(killerKey string) string {
+	return strings.TrimPrefix(killerKey, JOB_KILLER_DIR)
+}
+
 // 构造执行计划
 func BuildJobSchedulePlan(job *Job) (jobSchedulePlan *JobSchedulePlan, err error) {
 	var (
@@ -122,5 +127,7 @@ func BuildJobExecuteInfo(jobSchedulerPlan *JobSchedulePlan) (jobExecuteInfo *Job
 		PlanTime: jobSchedulerPlan.NextTime,
 		RealTime: time.Now(),
 	}
+	// 取消任务执行，杀死任务的上下文
+	jobExecuteInfo.CancelCtx, jobExecuteInfo.CancelFunc = context.WithCancel(context.TODO())
 	return
 }
