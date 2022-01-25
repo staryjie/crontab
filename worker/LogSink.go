@@ -41,7 +41,7 @@ func (logSink *LogSink) writeLoop() {
 			if logBatch == nil { // 当前批次的第一条日志
 				logBatch = &common.LogBatch{}
 				// 让这个批次的日志超时自动提交（给1秒时间）
-				commitTimer = time.AfterFunc(time.Duration(G_Config.JobLogCommitTimeout)*time.Millisecond,
+				commitTimer = time.AfterFunc(time.Duration(G_config.JobLogCommitTimeout)*time.Millisecond,
 					func(batch *common.LogBatch) func() {
 						return func() {
 							logSink.autoCommitChan <- batch
@@ -54,7 +54,7 @@ func (logSink *LogSink) writeLoop() {
 			logBatch.Logs = append(logBatch.Logs, log)
 
 			// 如果该批次满了，立即将日志写入到MongoDB
-			if len(logBatch.Logs) >= G_Config.JobLogBatchSize {
+			if len(logBatch.Logs) >= G_config.JobLogBatchSize {
 				// 发送日志
 				logSink.saveLogs(logBatch)
 				// 清空logBatch
@@ -83,15 +83,15 @@ func InitLogSink() (err error) {
 	// 连接MongoDB
 	if client, err = mongo.Connect(
 		context.TODO(),
-		G_Config.MongodbUri,
-		clientopt.ConnectTimeout(time.Duration(G_Config.MongodbCollectTimeout)*time.Millisecond)); err != nil {
+		G_config.MongodbUri,
+		clientopt.ConnectTimeout(time.Duration(G_config.MongodbCollectTimeout)*time.Millisecond)); err != nil {
 		return
 	}
 
 	// 选择db和collection
 	G_logSink = &LogSink{
 		client:         client,
-		logCollection:  client.Database(G_Config.JobLogStoreDb).Collection(G_Config.JobLogStoreCollection),
+		logCollection:  client.Database(G_config.JobLogStoreDb).Collection(G_config.JobLogStoreCollection),
 		logChan:        make(chan *common.JobLog, 1000),
 		autoCommitChan: make(chan *common.LogBatch, 1000),
 	}

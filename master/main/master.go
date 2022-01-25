@@ -28,6 +28,7 @@ func main() {
 	var (
 		err error
 	)
+
 	// 初始化命令行参数
 	initArgs()
 
@@ -39,17 +40,22 @@ func main() {
 		goto ERR
 	}
 
-	// 初始化日志管理器
+	// 初始化服务发现模块
+	if err = master.InitWorkerMgr(); err != nil {
+		goto ERR
+	}
+
+	// 日志管理器
 	if err = master.InitLogMgr(); err != nil {
 		goto ERR
 	}
 
-	// 任务管理器
+	//  任务管理器
 	if err = master.InitJobMgr(); err != nil {
 		goto ERR
 	}
 
-	// 启动API HTTP服务
+	// 启动Api HTTP服务
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
 	}

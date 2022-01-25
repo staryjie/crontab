@@ -197,6 +197,29 @@ ERR:
 	}
 }
 
+// 健康节点
+func handleWorkerList(resp http.ResponseWriter, req *http.Request) {
+	var (
+		workerArr []string
+		err       error
+		bytes     []byte
+	)
+
+	if workerArr, err = G_workerMgr.ListWorkers(); err != nil {
+		goto ERR
+	}
+
+	// 正常应答
+	if bytes, err = common.BuildResponse(0, "success", workerArr); err == nil {
+		resp.Write(bytes)
+	}
+	return
+ERR:
+	if bytes, err = common.BuildResponse(-1, err.Error(), nil); err == nil {
+		resp.Write(bytes)
+	}
+}
+
 // 初始化服务
 func InitApiServer() (err error) {
 	var (
@@ -208,11 +231,12 @@ func InitApiServer() (err error) {
 	)
 	// 初始化路由
 	mux = http.NewServeMux()
-	mux.HandleFunc("/job/save", handleJobSave)     // 保存任务
-	mux.HandleFunc("/job/delete", handleJobDelete) // 删除任务
-	mux.HandleFunc("/job/list", handleJobList)     // 获取所有任务
-	mux.HandleFunc("/job/kill", handleJobKill)     // 强杀任务
-	mux.HandleFunc("/job/log", handleJobLog)       // 日持查询
+	mux.HandleFunc("/job/save", handleJobSave)       // 保存任务
+	mux.HandleFunc("/job/delete", handleJobDelete)   // 删除任务
+	mux.HandleFunc("/job/list", handleJobList)       // 获取所有任务
+	mux.HandleFunc("/job/kill", handleJobKill)       // 强杀任务
+	mux.HandleFunc("/job/log", handleJobLog)         // 日持查询
+	mux.HandleFunc("/worker/list", handleWorkerList) // 健康节点
 
 	// http支持静态文件路由
 	staticDir = http.Dir(G_Config.WebRoot)

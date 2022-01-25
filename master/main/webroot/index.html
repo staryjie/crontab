@@ -177,6 +177,34 @@
         </div>
     </div>
 
+    <!--健康节点模态框-->
+    <div id="worker-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">健康节点</h4>
+                </div>
+                <div class="modal-body">
+                    <table id="worker-list" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>节点IP</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script>
     $(document).ready(function () {
@@ -214,6 +242,7 @@
             // 弹出模态框
             $('#new-job-modal').modal('show')
         })
+
         // 新建任务保存
         $('#new-job-save').on('click', function () {
             var jobInfo = {
@@ -231,6 +260,7 @@
                 }
             })
         })
+
         // 编辑任务
         $("#job-list").on("click", ".edit-job", function (event) {
             // 获取当前job信息，赋值给模态框的input
@@ -241,6 +271,7 @@
             // 弹出模态框
             $('#edit-modal').modal('show')
         });
+
         // 保存任务
         $('#sava-job').on('click', function () {
             var jobInfo = {
@@ -258,6 +289,7 @@
                 }
             })
         })
+
         // 删除任务
         $("#job-list").on("click", ".delete-job", function (event) {
             // 获取任务名
@@ -327,6 +359,37 @@
 
             // 弹出模态框
             $('#log-modal').modal('show')
+        })
+
+        // 健康节点
+        $('#list-worker').on('click', function () {
+            // 先清空表格的tbody
+            // $('#worker-list').empty()
+            $('#worker-list tbody').empty()
+
+            // ajax拉取注册成功的节点
+            $.ajax({
+                url: '/worker/list',
+                dataType: 'json',
+                success: function (resp) {
+                    if (resp.errno != 0) {
+                        return
+                    }
+
+                    var workerList = resp.data
+                    // 遍历IP，添加到模态框的table中
+                    for (var i = 0; i < workerList.length; ++i) {
+                        var workerIP = workerList[i]
+                        // window.alert(workerIP)
+                        var tr = $("<tr>")
+                        tr.append($('<td>').html(workerIP))
+                        tr.append()
+                        $('#worker-list tbody').append(tr)
+                    }
+                }
+            })
+            // 弹出模态框
+            $('#worker-modal').modal('show')
         })
 
         // 2.刷新任务列表

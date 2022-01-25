@@ -27,4 +27,10 @@ const (
 
 	// 从第几条日志开始查询
 	LOG_SKIP_NUM = 0
+
+	// 服务注册目录
+	JOB_WORK_DIR = "/cron/workers/"
+
+	// 服务注册租约过期时间，单位秒
+	REGISTER_WORKER_LEASE_TTL = 10
 )

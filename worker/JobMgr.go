@@ -132,8 +132,8 @@ func InitJobMgr() (err error) {
 
 	// 初始化配置
 	config = clientv3.Config{
-		Endpoints:   G_Config.EtcdEndpoints,                                     // Etcd集群
-		DialTimeout: time.Duration(G_Config.EtcdDialTimeout) * time.Millisecond, // 连接超时时间
+		Endpoints:   G_config.EtcdEndpoints,                                     // Etcd集群
+		DialTimeout: time.Duration(G_config.EtcdDialTimeout) * time.Millisecond, // 连接超时时间
 	}
 
 	// 建立连接

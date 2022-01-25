@@ -18,7 +18,7 @@ type Config struct {
 }
 
 var (
-	G_Config *Config
+	G_config *Config
 )
 
 // 加载配置
@@ -38,7 +38,7 @@ func InitConfig(configFile string) (err error) {
 	}
 
 	// 3.赋值单例
-	G_Config = &conf
+	G_config = &conf
 
 	return
 }
