@@ -239,19 +239,19 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/worker/list", handleWorkerList) // 健康节点
 
 	// http支持静态文件路由
-	staticDir = http.Dir(G_Config.WebRoot)
+	staticDir = http.Dir(G_config.WebRoot)
 	staticHandler = http.FileServer(staticDir)
 	mux.Handle("/", http.StripPrefix("/", staticHandler))
 
 	// 启动HTTP监听
-	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_Config.ApiPort)); err != nil {
+	if listener, err = net.Listen("tcp", ":"+strconv.Itoa(G_config.ApiPort)); err != nil {
 		return
 	}
 
 	// 创建一个HTTP服务
 	httpServer = &http.Server{
-		ReadTimeout:  time.Duration(G_Config.ApiReadTimeout) * time.Millisecond,
-		WriteTimeout: time.Duration(G_Config.ApiWriteTimeout) * time.Millisecond,
+		ReadTimeout:  time.Duration(G_config.ApiReadTimeout) * time.Millisecond,
+		WriteTimeout: time.Duration(G_config.ApiWriteTimeout) * time.Millisecond,
 		Handler:      mux,
 	}
 

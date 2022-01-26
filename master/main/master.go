@@ -63,7 +63,7 @@ func main() {
 	// 正常退出
 	// 测试使用，保证主进程不退出
 	fmt.Printf("[%v] Crontab Server started ...\n", time.Now().Format("2006-01-02 15:04:05"))
-	fmt.Printf("Please Visit http://127.0.0.1:%d/\n", master.G_Config.ApiPort)
+	fmt.Printf("Please Visit http://127.0.0.1:%d/\n", master.G_config.ApiPort)
 	for {
 		time.Sleep(1 * time.Second)
 	}
